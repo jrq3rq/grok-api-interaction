@@ -1,0 +1,343 @@
+/* General Styles */
+body {
+  width: 400px; /* Fixed width for the popup */
+  margin: 0;
+  padding: 20px;
+  font-family: "Arial", sans-serif;
+  background-color: #f9fafb; /* Subtle light gray background */
+  color: #333; /* Text color */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  box-sizing: border-box;
+}
+
+/* Header Style */
+h1 {
+  font-size: 20px;
+  font-weight: bold;
+  color: #4caf50; /* Vibrant green */
+  margin-bottom: 20px;
+  text-align: center;
+  border-bottom: 2px solid #e0e0e0;
+  padding-bottom: 10px;
+  width: 100%;
+}
+
+/* Textarea for user input */
+textarea {
+  width: 100%;
+  height: 100px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  padding: 10px;
+  margin-bottom: 15px;
+  font-size: 14px;
+  resize: none;
+  background-color: #ffffff;
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.1);
+  transition: border-color 0.2s;
+}
+
+textarea:focus {
+  border-color: #4caf50;
+  outline: none;
+}
+/* Button Container */
+.button-container {
+  display: flex;
+  justify-content: space-between; /* Space between the buttons */
+  width: 100%; /* Full width of the parent */
+  margin-top: 15px; /* Add spacing above the buttons */
+}
+
+.button-container button {
+  flex: 1; /* Make both buttons equal in size */
+  margin: 0 5px; /* Add spacing between buttons */
+}
+
+#send-prompt {
+  background-color: #4caf50; /* Green for the Send button */
+  color: white;
+  border: none;
+  border-radius: 8px;
+  padding: 12px;
+  font-size: 16px;
+  cursor: pointer;
+  font-weight: bold;
+  transition: background-color 0.2s, transform 0.1s;
+  box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+#send-prompt:hover {
+  background-color: #45a049;
+}
+
+#send-prompt:active {
+  transform: scale(0.98);
+}
+
+#clear-history {
+  background-color: #f44336; /* Red for the Clear Chat button */
+  color: white;
+  border: none;
+  border-radius: 8px;
+  padding: 12px;
+  font-size: 16px;
+  cursor: pointer;
+  font-weight: bold;
+  transition: background-color 0.2s, transform 0.1s;
+  box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+#clear-history:hover {
+  background-color: #d32f2f;
+}
+
+#clear-history:active {
+  transform: scale(0.98);
+}
+
+/* Send Button */
+button {
+  width: 100%;
+  background-color: #4caf50;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  padding: 12px;
+  font-size: 16px;
+  cursor: pointer;
+  font-weight: bold;
+  transition: background-color 0.2s, transform 0.1s;
+  box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+button:hover {
+  background-color: #45a049;
+}
+
+button:active {
+  transform: scale(0.98);
+}
+
+/* AI Response Section */
+#response {
+  margin-top: 15px;
+  padding: 10px;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  background-color: #ffffff;
+  box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.1);
+  color: #333; /* Text color */
+}
+
+.ai-response {
+  display: flex; /* Align label and content horizontally */
+  align-items: flex-start; /* Align the label to the top of the content */
+  margin: 5px 0; /* Add spacing between responses */
+}
+
+.ai-label {
+  font-weight: bold; /* Make the "AI:" label bold */
+  margin-right: 10px; /* Add spacing between the label and content */
+  color: #4caf50; /* Optional: Green color for the label */
+}
+
+.ai-content {
+  color: #333; /* Text color for the response */
+  font-style: italic; /* Optional: Italicize the response */
+  line-height: 1.5; /* Add spacing for readability */
+  flex: 1; /* Allow content to take up the remaining space */
+  word-wrap: break-word; /* Ensure long words or URLs break correctly */
+}
+
+/* Optional: Add a scrollbar style for a cleaner look */
+#response::-webkit-scrollbar {
+  width: 8px;
+}
+
+#response::-webkit-scrollbar-thumb {
+  background-color: #4caf50;
+  border-radius: 8px;
+}
+
+#response::-webkit-scrollbar-track {
+  background: #e0e0e0;
+}
+
+.show-more-button {
+  display: block;
+  margin-top: 15px;
+  color: #4caf50; /* Match button color with theme */
+  cursor: pointer;
+  font-size: 14px;
+  background: none;
+  border: none;
+  font-weight: bold;
+}
+
+.show-more-button:hover {
+  text-decoration: underline; /* Add hover effect */
+}
+
+/* Chat History Section */
+.chat-history {
+  display: flex;
+  flex-direction: column-reverse; /* Reverse the order visually */
+  margin-top: 20px;
+  padding: 15px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  background-color: #ffffff;
+  max-height: 300px;
+  overflow-y: auto;
+  box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.1);
+  width: 100%;
+}
+
+.chat-history .chat-message {
+  margin-bottom: 15px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+.chat-history .chat-message:last-child {
+  border-bottom: none;
+}
+/* AI Response Section */
+.chat-message .ai {
+  display: flex; /* Align "AI:" and the response in one line */
+  align-items: flex-start; /* Align items to the top */
+  gap: 8px; /* Adjust spacing between "AI:" and the response */
+}
+
+.chat-message .ai strong {
+  flex-shrink: 0; /* Prevent "AI:" label from shrinking */
+}
+
+.chat-message .ai .formatted-response {
+  flex-grow: 1; /* Allow the response to take the remaining space */
+  text-align: left; /* Align text to the left */
+}
+
+/* General improvements for response readability */
+.message-wrapper p {
+  margin: 0 0 10px 0; /* Space between paragraphs */
+  line-height: 1.6; /* Improve readability of text */
+}
+
+.list-item {
+  margin-left: 20px; /* Indent list items slightly */
+  font-size: 14px; /* Keep list items slightly smaller than headings */
+  line-height: 1.5; /* Maintain spacing for lists */
+}
+
+.show-more-button {
+  margin-top: 10px;
+  color: #4caf50;
+  cursor: pointer;
+  font-size: 14px;
+  background: none;
+  border: none;
+  font-weight: bold;
+}
+
+.ai {
+  margin-left: 0px;
+}
+
+.chat-history .chat-message .user {
+  font-weight: bold;
+  color: #4caf50;
+  margin-bottom: 5px;
+}
+
+.chat-history .chat-message .ai {
+  color: #333;
+}
+
+/* Footer Style */
+footer {
+  margin-top: 20px;
+  font-size: 12px;
+  color: #aaa;
+  text-align: center;
+}
+
+footer a {
+  color: #4caf50;
+  text-decoration: none;
+}
+
+footer a:hover {
+  text-decoration: underline;
+}
+
+.chat-message {
+  margin-bottom: 10px;
+}
+
+.chat-message .user {
+  font-weight: bold;
+  color: #4caf50;
+}
+
+.chat-message .ai {
+  font-style: italic;
+  color: #333;
+}
+
+/* Container for the chat */
+.chat-container {
+  width: 400px;
+  margin: 0 auto;
+  padding: 15px;
+  background-color: #f9fafb;
+  border-radius: 8px;
+  box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+/* Header styles */
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.header h1 {
+  font-size: 20px;
+  color: #4caf50;
+  margin: 0;
+}
+
+h1 {
+  font-size: 20px;
+  font-weight: bold;
+  color: #4caf50; /* Vibrant green */
+  margin-bottom: 20px;
+  text-align: center;
+  border-bottom: none; /* Remove the underline */
+  padding-bottom: 10px;
+  width: 100%;
+}
+
+#close-button {
+  background: none; /* Remove background color */
+  color: #f44336; /* Red color for the "X" */
+  border: none; /* Remove border */
+  font-size: 20px; /* Slightly larger font size for better visibility */
+  font-weight: bold; /* Bold text for the "X" */
+  cursor: pointer; /* Add pointer cursor on hover */
+  position: absolute; /* Position it relative to the container */
+  top: 10px; /* Adjust the vertical spacing */
+  left: 180px; /* Adjust the horizontal spacing */
+  padding: 0; /* Remove default padding */
+  box-shadow: none;
+}
+
+#close-button:hover {
+  color: #d32f2f; /* Slightly darker red on hover */
+}

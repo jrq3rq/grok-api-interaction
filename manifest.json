@@ -1,0 +1,12 @@
+{
+  "manifest_version": 3,
+  "name": "Grok Chat",
+  "version": "1.0",
+  "description": "Basic Chrome extension to test Grok AI chat functionality.",
+  "permissions": ["activeTab"],
+  "host_permissions": ["http://localhost:3000/*"],
+  "action": {
+    "default_popup": "index.html",
+    "default_icon": "logo.png"
+  }
+}

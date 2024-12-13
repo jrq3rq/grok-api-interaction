@@ -12,6 +12,7 @@ grok-api-interaction/
 ├── .env # Contains your API key and environment variables
 ├── .gitignore # Ensures sensitive files like .env are not committed
 ├── grok-interaction.js # Main script for testing AI interaction logic
+├── manifest.json # Chrome extension manifest file (goes at the root)
 ├── package.json # Node.js project configuration
 ├── core/ # Modular core for shared, reusable logic
 │ ├── firebase-config.js # Firebase initialization and configuration
@@ -29,6 +30,7 @@ grok-api-interaction/
 │ │ └── custom.js # Optional client-specific customization logic
 ├── templates/ # Templates for UI components
 │ ├── popup-template.html # Base HTML for Chrome extension popup
+│ ├── popup.js # Frontend logic for Chrome extension popup
 │ ├── styles.css # Shared styles for the UI
 │ └── client-config.json # Fallback template configuration for new clients
 └── tools/ # Utility scripts and deployment tools
