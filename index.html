@@ -4,9 +4,18 @@
     <title>Grok Chat</title>
     <link rel="stylesheet" href="templates/styles.css" />
   </head>
-  <body>
+  <!-- <div id="overlay" class="overlay" style="display: none">
+    <div class="overlay-content">
+      <button id="close-overlay">Unblock Overlay</button>
+    </div>
+  </div>
+
+  <button id="show-overlay">Block Overlay</button> -->
+
+  <body class="popup-wrapper">
     <div class="header">
-      <h1>Grok Chat</h1>
+      <!-- <h2>AI Optimizer</h2> -->
+      <h1>Grok Bot</h1>
       <button id="close-button">X</button>
     </div>
     <textarea id="user-prompt" placeholder="Ask something..."></textarea>
@@ -16,13 +25,20 @@
     </div>
     <div id="response">
       <div class="ai">
-        <strong>Grok AI:</strong>
+        <strong>Legal Enhancer AI:</strong>
         <div class="formatted-response"></div>
       </div>
     </div>
+    <div class="chat-history-container" style="display: none">
+      <h2 class="chat-history-title">Chat History</h2>
+      <div class="chat-history"></div>
+    </div>
+    <button id="save-all-chats">Download All Chats</button>
 
+    <!-- Move your script here -->
     <script src="templates/popup.js"></script>
   </body>
+
   <footer>
     Built with &#x2764;&#xFE0F; by
     <a href="https://studiovoice2fly.com/" target="_blank"
