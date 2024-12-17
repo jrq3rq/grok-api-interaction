@@ -7,6 +7,10 @@ const app = express();
 app.use(express.json());
 app.use(cors());
 
+// Increase the body size limit:
+app.use(express.json({ limit: "10mb" }));
+app.use(cors());
+
 // Endpoint to handle chat requests
 app.post("/chat", async (req, res) => {
   const { prompt } = req.body;

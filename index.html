@@ -11,34 +11,63 @@
   </div>
 
   <button id="show-overlay">Block Overlay</button> -->
-
   <body class="popup-wrapper">
+    <!-- Header Section -->
     <div class="header">
-      <!-- <h2>AI Optimizer</h2> -->
       <h1>Grok Bot</h1>
       <button id="close-button">X</button>
     </div>
+
+    <!-- Input Textarea -->
     <textarea id="user-prompt" placeholder="Ask something..."></textarea>
-    <div class="button-container">
-      <button id="send-prompt">Send</button>
-      <button id="clear-history">Clear Chat</button>
-    </div>
+    <!-- AI Response Section -->
     <div id="response">
       <div class="ai">
         <strong>Legal Enhancer AI:</strong>
         <div class="formatted-response"></div>
       </div>
     </div>
-    <div class="chat-history-container" style="display: none">
-      <h2 class="chat-history-title">Chat History</h2>
-      <div class="chat-history"></div>
+    <!-- Existing Buttons -->
+    <div class="button-container">
+      <button id="send-prompt">Send</button>
+      <button id="clear-history">Clear Chat</button>
     </div>
+    <!-- File Upload Section -->
+    <div class="upload-container">
+      <label for="file-upload" class="upload-label">
+        Drag files here or click to upload
+      </label>
+      <input type="file" id="file-upload" class="file-upload" multiple />
+    </div>
+
+    <!-- Button Container with New Buttons -->
+    <div class="dropdown-container">
+      <button id="format-button" class="dropdown-button">Format</button>
+      <div class="dropdown-content" id="format-dropdown">
+        <a href="#" data-format="key-points">Key Points</a>
+        <a href="#" data-format="client-summary">Client Summary</a>
+        <a href="#" data-format="bullet-list">Bullet List</a>
+      </div>
+    </div>
+    <div class="button-container">
+      <button id="summarize-button">Summarize</button>
+    </div>
+    <div id="custom-modal" class="modal">
+      <div class="modal-content">
+        <h2>Custom Alert</h2>
+        <p>Please upload a file to summarize.</p>
+        <button id="close-modal">OK</button>
+      </div>
+    </div>
+
+    <!-- Download All Chats Button -->
     <button id="save-all-chats">Download All Chats</button>
 
-    <!-- Move your script here -->
+    <!-- Script -->
     <script src="templates/popup.js"></script>
   </body>
 
+  <!-- Footer Section -->
   <footer>
     Built with &#x2764;&#xFE0F; by
     <a href="https://studiovoice2fly.com/" target="_blank"
