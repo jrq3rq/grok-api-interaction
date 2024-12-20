@@ -15,6 +15,7 @@ body {
   box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2); /* Optional shadow */
   overflow: hidden; /* Prevent overflow outside rounded corners */
 }
+
 button {
   display: flex;
   align-items: center;
@@ -27,6 +28,19 @@ button {
   box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2); /* Elevated look */
 }
 
+#user-prompt {
+  width: 90%;
+}
+
+.input-container {
+  background-color: lightgoldenrodyellow;
+}
+#upload-file-button {
+  padding: 8px;
+  width: 100%;
+  margin-bottom: 15px; /* Adds space below each container */
+}
+
 /* Header Styles */
 h1 {
   font-size: 20px;
@@ -34,7 +48,6 @@ h1 {
   color: #4caf50; /* Vibrant green */
   margin-bottom: 20px;
   text-align: center;
-  /* border-bottom: 2px solid #e0e0e0; */
   padding-bottom: 10px;
   width: 100%;
 }
@@ -46,7 +59,6 @@ h2 {
   margin-bottom: 20px;
   text-align: center;
   text-transform: uppercase;
-  /* border-bottom: 2px solid #e0e0e0; */
   padding-bottom: 10px;
   width: 100%;
 }
@@ -107,10 +119,6 @@ textarea:focus {
   display: flex;
   justify-content: space-between; /* Space between the buttons */
   width: 100%; /* Full width of the parent */
-}
-
-.button-container,
-.dropdown-container {
   margin-bottom: 15px; /* Adds space below each container */
 }
 
@@ -180,15 +188,15 @@ button:active {
 }
 
 #response ol {
-  margin: 10px 0; /* Add spacing above and below the entire ordered list */
-  padding-left: 20px; /* Indent the list for better readability */
+  margin: 10px 0;
+  padding-left: 20px;
 }
 
 #response ol li {
-  margin-top: 10px; /* Add spacing between list items */
-  line-height: 1.6; /* Increase line spacing for better readability */
-  font-size: 14px; /* Optional: Adjust the font size for better clarity */
-  color: #333; /* Ensure consistent text color */
+  margin-top: 10px;
+  line-height: 1.6;
+  font-size: 14px;
+  color: #333;
 }
 
 #response::-webkit-scrollbar {
@@ -246,12 +254,19 @@ button:active {
   margin-top: 20px;
 }
 
+/* .chat-message {
+  background-color: #f9f9f9;
+  border: 1px solid #ddd;
+  border-radius: 10px;
+  padding: 10px;
+  margin-bottom: 10px;
+} */
 .chat-message {
-  background-color: #f9f9f9; /* Light gray background */
-  border: 1px solid #ddd; /* Optional: Add a border */
-  border-radius: 10px; /* Adds rounded corners */
-  padding: 10px; /* Adds space inside the chat message */
-  margin-bottom: 10px; /* Adds spacing between chat messages */
+  margin: 10px;
+  padding: 15px;
+  border-radius: 8px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  border: 1px solid #0000001a;
 }
 
 .chat-message:last-child {
@@ -260,19 +275,28 @@ button:active {
 
 .chat-message .user {
   font-weight: bold;
-  color: #4caf50;
   margin-bottom: 5px;
 }
 
 .chat-message .ai {
   color: #333;
+  font-size: 10px;
 }
 
-.timestamp {
-  font-size: 10px; /* Adjust the font size as needed */
-  color: gray; /* Optional: Set the color to differentiate the timestamp */
-  margin-top: 5px; /* Optional: Add spacing above the timestamp */
-  font-style: italic; /* Optional: Add italic styling */
+.chat-message .formatted-response {
+  margin-top: 5px;
+  padding: 10px;
+  background-color: #f9f9f9;
+  border-radius: 5px;
+  font-family: Arial, sans-serif;
+  font-size: 14px;
+  border: 1px solid #0000001a;
+}
+
+.chat-message .timestamp {
+  margin-top: 10px;
+  font-size: 12px;
+  color: #888;
 }
 
 /* Overlay Styles */
@@ -282,11 +306,11 @@ button:active {
   left: 0;
   width: 100%;
   height: 100%;
-  background-color: rgba(0, 0, 0, 0.7); /* Semi-transparent black */
+  background-color: rgba(0, 0, 0, 0.7);
   display: flex;
   justify-content: center;
   align-items: center;
-  z-index: 1000; /* Ensure it's above all other elements */
+  z-index: 1000;
 }
 
 .overlay-content {
@@ -305,7 +329,7 @@ button:active {
   padding: 10px 20px;
   border: none;
   height: 450px;
-  background-color: #f44336; /* Red */
+  background-color: #f44336;
   color: white;
   font-size: 14px;
   cursor: pointer;
@@ -313,7 +337,7 @@ button:active {
 }
 
 #close-overlay:hover {
-  background-color: #d32f2f; /* Darker red */
+  background-color: #d32f2f;
 }
 
 .trigger-overlay-button {
@@ -321,70 +345,78 @@ button:active {
   top: 10px;
   right: 10px;
   padding: 10px 15px;
-  background-color: #4caf50; /* Green */
+  background-color: #4caf50;
   color: white;
   font-size: 14px;
   border: none;
   border-radius: 5px;
   cursor: pointer;
-  z-index: 1010; /* Ensure it's above other elements */
+  z-index: 1010;
 }
 
 .trigger-overlay-button:hover {
-  background-color: #388e3c; /* Darker green */
+  background-color: #388e3c;
 }
 
 #save-all-chats {
-  position: fixed; /* Fix button to the bottom */
-  bottom: 0; /* Align to the bottom */
-  left: 50%; /* Center horizontally */
+  position: fixed;
+  bottom: 0;
+  left: 50%;
   transform: translateX(-50%);
   margin: 0;
   padding: 10px 20px;
   font-size: 16px;
-  background-color: #4caf50; /* Green button */
+  background-color: #4caf50;
   color: white;
   border: none;
-  border-radius: 0; /* Completely remove border radius */
+  border-radius: 0;
   box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.2);
   z-index: 100;
-  display: none; /* Initially hidden */
+  display: none;
 }
 
 #save-all-chats.visible {
-  display: block; /* Show when chat exists */
+  display: inline-block; /* Show when visible */
 }
 
-.chat-history {
-  margin-bottom: 0; /* Remove bottom margin */
-  padding-bottom: 10px; /* Optional: Add slight padding for text */
-  box-sizing: border-box; /* Prevent unexpected spacing */
+#save-all-chats:hover {
+  background-color: #0056b3;
 }
 
-.upload-container {
-  border: 2px dashed #4caf50;
-  height: 50px;
-  width: 95%;
-  border-radius: 8px;
-  padding: 15px;
-  text-align: center;
-  margin-bottom: 15px;
-  cursor: pointer;
-  color: #4caf50;
+.chat-message.chat {
+  background-color: #f7ffeb; /* Light green */
+}
+.chat-message.summarize {
+  background-color: #e7f4ff; /* Light blue */
+}
+.chat-message.generate-bullet-points {
+  background-color: #f3e7ff; /* Light purple */
+}
+.chat-message.draft-summary {
+  background-color: #fffbe7; /* Light yellow */
 }
 
+/* Removed upload-container and file-upload styles
+     since the file upload section is removed */
+
+/* Keep upload-label because it's used by the Summarize Modal */
 .upload-label {
   font-weight: bold;
+  cursor: pointer; /* Ensure cursor reflects clickable action */
 }
 
-.file-upload {
-  display: none; /* Hide input */
-}
-
-.dropdown-container {
+.main-dropdown-container {
   position: relative;
   display: inline-block;
   width: 97%;
+  margin-bottom: 15px;
+}
+/* Dropdown and Modal styling */
+.dropdown-container {
+  position: relative;
+  display: inline-block;
+  /* width: 97%; */
+  margin-bottom: 15px;
 }
 
 .dropdown-button {
@@ -439,28 +471,18 @@ button:active {
   opacity: 1;
 }
 
-/* Style for active buttons with icons */
 button.active {
   position: relative;
 }
 
 button.active::after {
-  content: "✓"; /* Checkmark icon */
+  content: "✓";
   position: absolute;
   top: 5px;
   right: 5px;
   color: green;
   font-weight: bold;
   font-size: 14px;
-}
-
-/* Dropdown styling to match other buttons */
-.dropdown-content {
-  display: none;
-  position: absolute;
-  background-color: white;
-  border: 1px solid #ddd;
-  z-index: 100;
 }
 
 .dropdown:hover .dropdown-content {
@@ -478,49 +500,159 @@ button.active::after {
   background-color: #f3f3f3;
 }
 
+.tag-section input {
+  width: 100%;
+  padding: 8px;
+  margin: 10px 0;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+.button-container button {
+  margin: 5px;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 8px;
+  font-weight: bold;
+  cursor: pointer;
+  background-color: #4caf50;
+  color: white;
+}
+
+.button-container button:hover {
+  background-color: #45a049;
+}
+
+button#close-modal {
+  background-color: #f44336;
+}
+
+button#close-modal:hover {
+  background-color: #d32f2f;
+}
+
+/* Modal Overlay */
 .modal {
   position: fixed;
   top: 0;
   left: 0;
   width: 100%;
   height: 100%;
-  background-color: rgba(0, 0, 0, 0.7);
-  display: none; /* Hidden by default */
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
   justify-content: center;
   align-items: center;
-  z-index: 9999; /* On top of other elements */
+  z-index: 999;
+}
+.hidden {
+  display: none !important;
+}
+
+.hidden-input {
+  display: none;
+}
+
+.upload-indicator {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 15px;
+  padding: 10px;
+  border: 2px solid #4caf50;
+  border-radius: 8px;
+  background-color: #f0fff0;
+  transition: opacity 0.3s ease;
+  font-size: 14px;
+  color: #333;
+}
+
+.upload-indicator .checkmark {
+  color: #4caf50;
+  font-weight: bold;
+  font-size: 18px;
+  display: inline-block;
+  margin-right: 5px;
+}
+
+.upload-indicator .file-info {
+  color: #333;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 200px;
+  display: inline-block;
+}
+
+.upload-indicator.hidden {
+  display: none;
+}
+
+.clickable-label {
+  cursor: pointer;
+}
+
+.clickable-label {
+  cursor: pointer;
 }
 
 .modal-content {
   background: #fff;
+  padding: 20px 30px;
   border-radius: 8px;
-  padding: 20px 30px; /* Control your own padding here */
-  max-width: 300px;
   text-align: center;
+  width: 350px;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+  margin: 20px;
 }
 
-.modal-content h2 {
-  margin-top: 0; /* No extra space at top */
-  font-size: 20px;
-  color: #333;
-}
-
-.modal-content p {
-  margin: 20px 0; /* Adjust spacing as needed */
-  color: #333;
-}
-
-.modal-content button {
-  background: #4caf50;
-  color: #fff;
-  border: none;
-  border-radius: 5px;
-  padding: 10px 20px; /* Adjust padding for button */
+.upload-area {
+  border: 2px dashed #ccc;
+  border-radius: 8px;
+  padding: 20px;
+  margin: 15px 0;
   cursor: pointer;
 }
 
-.modal-content button:hover {
-  background: #45a049;
+.close-button {
+  color: #aaa;
+  float: right;
+  font-size: 28px;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.close-button:hover {
+  color: black;
+}
+
+.drop-area {
+  border: 2px dashed #4caf50;
+  border-radius: 8px;
+  padding: 20px;
+  text-align: center;
+  cursor: pointer;
+  margin-bottom: 15px;
+  background-color: #f9f9f9;
+  transition: background-color 0.2s;
+}
+
+.drop-area p {
+  margin: 0;
+  font-size: 14px;
+  color: #555;
+}
+
+.drop-area.drag-over {
+  background-color: #e7ffe7; /* Light green tint when dragging file over */
+}
+
+.tags-section input {
+  width: 100%;
+  padding: 8px;
+  margin-top: 10px;
+  border: 1px solid #ddd;
+  border-radius: 5px;
 }
 
 /* Footer Style */

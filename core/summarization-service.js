@@ -1,28 +1,29 @@
-const axios = require("axios");
+async function interactWithGrok(prompt) {
+  console.log("Sending prompt to GROK:", prompt);
+  // Make your GROK API call here, using GROK_API_URL and GROK_API_KEY
 
-async function summarizeWithGrok(text) {
+  // For example:
+  const response = await fetch(process.env.GROK_API_URL, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${process.env.GROK_API_KEY}`,
+    },
+    body: JSON.stringify({ prompt }),
+  });
+
+  // Check the response
+  const text = await response.text();
+  console.log("GROK raw response:", text);
+
+  let json;
   try {
-    // Replace this with your AI API call for summarization
-    const response = await axios.post(
-      "https://api.openai.com/v1/engines/davinci-codex/completions",
-      {
-        prompt: `Summarize the following text in the least amount of words, focusing on the most important points:\n\n${text}`,
-        max_tokens: 100, // Adjust token limit as needed
-        temperature: 0.7,
-      },
-      {
-        headers: {
-          Authorization: `Bearer ${process.env.OPENAI_API_KEY}`, // Use your API key from environment variables
-          "Content-Type": "application/json",
-        },
-      }
-    );
-
-    return response.data.choices[0].text.trim();
-  } catch (error) {
-    console.error("Error in summarizeWithGrok:", error.message);
-    throw new Error("Summarization service failed.");
+    json = JSON.parse(text);
+  } catch (e) {
+    console.error("GROK response is not valid JSON:", e.message);
+    throw new Error("GROK API returned invalid JSON");
   }
-}
 
-module.exports = { summarizeWithGrok };
+  // Assuming GROK API returns an object with a 'response' field
+  return json.response;
+}

@@ -3,23 +3,34 @@
   <head>
     <title>Grok Chat</title>
     <link rel="stylesheet" href="templates/styles.css" />
+    <meta charset="UTF-8" />
   </head>
-  <!-- <div id="overlay" class="overlay" style="display: none">
-    <div class="overlay-content">
-      <button id="close-overlay">Unblock Overlay</button>
-    </div>
-  </div>
-
-  <button id="show-overlay">Block Overlay</button> -->
   <body class="popup-wrapper">
     <!-- Header Section -->
     <div class="header">
       <h1>Grok Bot</h1>
       <button id="close-button">X</button>
     </div>
+    <!-- Input Section -->
+    <div class="input-section">
+      <!-- Action Dropdown -->
+      <div class="dropdown-container">
+        <label for="action-dropdown">Select Action:</label>
+        <select id="action-dropdown">
+          <option value="chat">Chat</option>
+          <option value="summarize">Summarize</option>
+          <option value="generate-bullet-points">Generate Bullet Points</option>
+          <option value="draft-summary">Draft Summary</option>
+        </select>
+      </div>
 
-    <!-- Input Textarea -->
-    <textarea id="user-prompt" placeholder="Ask something..."></textarea>
+      <!-- Text Input -->
+      <textarea id="user-prompt" placeholder="Type your message..."></textarea>
+
+      <!-- File Upload Button -->
+      <button id="upload-file-button">Upload File</button>
+    </div>
+
     <!-- AI Response Section -->
     <div id="response">
       <div class="ai">
@@ -27,36 +38,35 @@
         <div class="formatted-response"></div>
       </div>
     </div>
+
     <!-- Existing Buttons -->
     <div class="button-container">
       <button id="send-prompt">Send</button>
       <button id="clear-history">Clear Chat</button>
     </div>
-    <!-- File Upload Section -->
-    <div class="upload-container">
-      <label for="file-upload" class="upload-label">
-        Drag files here or click to upload
-      </label>
-      <input type="file" id="file-upload" class="file-upload" multiple />
-    </div>
 
-    <!-- Button Container with New Buttons -->
-    <div class="dropdown-container">
-      <button id="format-button" class="dropdown-button">Format</button>
-      <div class="dropdown-content" id="format-dropdown">
-        <a href="#" data-format="key-points">Key Points</a>
-        <a href="#" data-format="client-summary">Client Summary</a>
-        <a href="#" data-format="bullet-list">Bullet List</a>
-      </div>
-    </div>
-    <div class="button-container">
-      <button id="summarize-button">Summarize</button>
-    </div>
-    <div id="custom-modal" class="modal">
+    <!-- Summarize Modal for File Upload -->
+    <div id="summarize-modal" class="modal hidden">
       <div class="modal-content">
-        <h2>Custom Alert</h2>
-        <p>Please upload a file to summarize.</p>
-        <button id="close-modal">OK</button>
+        <span id="close-summarize-modal" class="close-button">&times;</span>
+        <h2>Upload File</h2>
+        <p>Drag & Drop files here or click to upload</p>
+        <div class="drop-area" id="drop-area">
+          <input
+            type="file"
+            id="summarize-file-upload"
+            accept=".txt, .doc, .docx, .pdf"
+            class="hidden-input"
+          />
+        </div>
+        <div class="upload-indicator hidden" id="upload-indicator">
+          <span id="uploaded-filename"></span>
+        </div>
+        <div class="button-container">
+          <button id="submit-summarize">Submit</button>
+          <button id="clear-file">Clear File</button>
+          <button id="cancel-summarize">Cancel</button>
+        </div>
       </div>
     </div>
 
@@ -65,13 +75,13 @@
 
     <!-- Script -->
     <script src="templates/popup.js"></script>
-  </body>
 
-  <!-- Footer Section -->
-  <footer>
-    Built with &#x2764;&#xFE0F; by
-    <a href="https://studiovoice2fly.com/" target="_blank"
-      >StudioVoice2fly.com</a
-    >
-  </footer>
+    <!-- Footer Section -->
+    <footer>
+      Built with ❤️ by
+      <a href="https://studiovoice2fly.com/" target="_blank"
+        >StudioVoice2fly.com</a
+      >
+    </footer>
+  </body>
 </html>
