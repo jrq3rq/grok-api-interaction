@@ -9,14 +9,15 @@
     <!-- Header Section -->
     <div class="header">
       <h1>Grok Bot</h1>
-      <button id="close-button">X</button>
+      <button id="close-button" aria-label="Close">X</button>
     </div>
+
     <!-- Input Section -->
     <div class="input-section">
       <!-- Action Dropdown -->
       <div class="dropdown-container">
         <label for="action-dropdown">Select Action:</label>
-        <select id="action-dropdown">
+        <select id="action-dropdown" aria-label="Select Action">
           <option value="chat">Chat</option>
           <option value="summarize">Summarize</option>
           <option value="generate-bullet-points">Generate Bullet Points</option>
@@ -25,10 +26,38 @@
       </div>
 
       <!-- Text Input -->
-      <textarea id="user-prompt" placeholder="Type your message..."></textarea>
+      <textarea
+        id="user-prompt"
+        placeholder="Type your message..."
+        aria-label="User Prompt"
+      ></textarea>
 
-      <!-- File Upload Button -->
-      <button id="upload-file-button">Upload File</button>
+      <!-- Drag & Drop Area (Replaces Upload Button) -->
+      <p>Drag & Drop files here or click to upload</p>
+      <div
+        class="drop-area"
+        id="drop-area"
+        tabindex="0"
+        aria-label="File Upload Area"
+      >
+        <input
+          type="file"
+          id="summarize-file-upload"
+          accept=".txt, .doc, .docx, .odt, .rtf, .pdf, .xls, .xlsx, .ods, .ppt, .pptx, .odp, .csv, .json, .xml, .jpg, .jpeg, .png, .tiff, .mp3, .mp4, .avi"
+          class="hidden-input"
+          aria-hidden="true"
+        />
+      </div>
+
+      <!-- Uploaded File Indicator -->
+      <div id="upload-indicator" class="hidden" aria-live="polite">
+        <span id="uploaded-filename"></span>
+      </div>
+
+      <!-- Clear File Button -->
+      <div class="button-container">
+        <button id="clear-file">Clear File</button>
+      </div>
     </div>
 
     <!-- AI Response Section -->
@@ -45,35 +74,11 @@
       <button id="clear-history">Clear Chat</button>
     </div>
 
-    <!-- Summarize Modal for File Upload -->
-    <div id="summarize-modal" class="modal hidden">
-      <div class="modal-content">
-        <span id="close-summarize-modal" class="close-button">&times;</span>
-        <h2>Upload File</h2>
-        <p>Drag & Drop files here or click to upload</p>
-        <div class="drop-area" id="drop-area">
-          <input
-            type="file"
-            id="summarize-file-upload"
-            accept=".txt, .doc, .docx, .pdf"
-            class="hidden-input"
-          />
-        </div>
-        <div class="upload-indicator hidden" id="upload-indicator">
-          <span id="uploaded-filename"></span>
-        </div>
-        <div class="button-container">
-          <button id="submit-summarize">Submit</button>
-          <button id="clear-file">Clear File</button>
-          <button id="cancel-summarize">Cancel</button>
-        </div>
-      </div>
-    </div>
-
     <!-- Download All Chats Button -->
     <button id="save-all-chats">Download All Chats</button>
 
-    <!-- Script -->
+    <!-- Script: Load Tesseract.js First -->
+
     <script src="templates/popup.js"></script>
 
     <!-- Footer Section -->

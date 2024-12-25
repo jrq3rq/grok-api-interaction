@@ -1,3 +1,8 @@
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
 /* General Styles */
 body {
   min-width: 400px;
@@ -187,6 +192,15 @@ button:active {
   color: #333;
 }
 
+#response::-webkit-scrollbar-thumb {
+  background-color: #4caf50;
+  border-radius: 8px;
+}
+
+#response::-webkit-scrollbar-track {
+  background: #e0e0e0;
+}
+
 #response ol {
   margin: 10px 0;
   padding-left: 20px;
@@ -220,7 +234,7 @@ button:active {
   font-size: 14px;
   background: none;
   border: none;
-  font-weight: bold;
+  /* font-weight: bold; */
 }
 
 .show-more-button:hover {
@@ -254,19 +268,14 @@ button:active {
   margin-top: 20px;
 }
 
-/* .chat-message {
-  background-color: #f9f9f9;
-  border: 1px solid #ddd;
-  border-radius: 10px;
-  padding: 10px;
-  margin-bottom: 10px;
-} */
 .chat-message {
   margin: 10px;
   padding: 15px;
   border-radius: 8px;
   box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
   border: 1px solid #0000001a;
+  max-width: 100%; /* Ensures messages don't exceed the container's width */
+  word-wrap: break-word; /* Breaks long words to prevent horizontal overflow */
 }
 
 .chat-message:last-child {
@@ -274,13 +283,73 @@ button:active {
 }
 
 .chat-message .user {
-  font-weight: bold;
-  margin-bottom: 5px;
+  /* font-weight: bold; */
+  margin-bottom: 10px;
 }
 
 .chat-message .ai {
   color: #333;
   font-size: 10px;
+}
+
+/* Delete Chat Button Styles */
+.delete-chat {
+  background-color: #f44336; /* Red for delete action */
+  color: white;
+}
+
+.delete-chat:hover {
+  background-color: #d32f2f; /* Darker red on hover */
+}
+
+.delete-chat:active {
+  transform: scale(0.98);
+}
+
+.download-chat {
+  margin-top: 5px;
+  padding: 5px 10px;
+  background-color: #007bff;
+  color: #fff;
+  border: none;
+  border-radius: 3px;
+  cursor: pointer;
+}
+
+.download-chat:hover {
+  background-color: #0056b3;
+}
+
+/* Common styles for both Download and Delete buttons */
+.common-button {
+  margin-top: 10px;
+  border: 1px solid #0000001a;
+  color: #333;
+  padding: 10px;
+  border-radius: 5px;
+  font-size: 10px;
+  text-transform: uppercase;
+  box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.2);
+  cursor: pointer;
+}
+
+/* Specific styles for Download Chat button */
+.download-chat {
+  background-color: var(--button-bg-color, #e0e0e0); /* Default light gray */
+}
+
+/* Specific styles for Delete Chat button */
+.delete-chat {
+  background-color: var(--button-bg-color, #e0e0e0); /* Same as Download Chat */
+}
+
+/* Hover Effects */
+.download-chat:hover {
+  background-color: #d5d5d5;
+}
+
+.delete-chat:hover {
+  background-color: #d32f2f;
 }
 
 .chat-message .formatted-response {
@@ -549,6 +618,10 @@ button#close-modal:hover {
 }
 
 .hidden-input {
+  display: none;
+}
+
+#upload-indicator.hidden {
   display: none;
 }
 
