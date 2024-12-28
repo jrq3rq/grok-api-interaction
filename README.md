@@ -14,6 +14,14 @@ The architecture is designed for **reusability**, **scalability**, and **easy cu
 - **Customizable Branding and UI**: Easily swap logos, styles, and configurations per client for white-label solutions.
 - **Chat History Management**: Save, view, download, and clear chat histories using local storage.
 - **File Upload and Processing**: Users can upload files directly via the extension and process them through AI services (e.g., summarization, key points).
+- **Essential AI Utilities for Legal and Corporate Use Cases**:
+  - **Document Summarization**: Quickly condense contracts, filings, and case files.
+  - **Compliance Automation**: Real-time checklists, regulatory updates, and risk alerts.
+  - **Real-Time Legal Research**: Search and retrieve relevant case law, precedents, and keywords instantly.
+  - **Task Tracking**: Manage deadlines, calendars, and reminders effectively.
+  - **Data Insights**: Generate financial breakdowns, client reports, and actionable trends.
+  - **Interactive Tools**: Facilitate drafting policies, analyzing risks, and calculating scenarios.
+  - **File Processing**: Enable seamless upload, organization, and parsing of documents.
 
 ---
 
@@ -22,17 +30,21 @@ The architecture is designed for **reusability**, **scalability**, and **easy cu
 ```markdown
 grok-api-interaction/
 │
-├── .env # Environment variables, including API keys
+├── .env # Environment variables, including API keys and MongoDB URI
 ├── .gitignore # Ensures sensitive files like .env are not committed
 ├── grok-interaction.js # Main script for backend logic & AI interaction
 ├── manifest.json # Chrome extension manifest (v3)
 ├── package.json # Node.js project dependencies & scripts
 │
 ├── core/ # Modular core for shared, reusable logic
+│ ├── mongo-config.js # MongoDB initialization and configuration
+│ ├── models/ # Mongoose schemas and models
+│ │ ├── ChatHistory.js
+│ │ └── LawFirm.js
 │ ├── firebase-config.js # Firebase initialization and configuration
 │ ├── ai-service.js # Wrapper for AI interactions (e.g., OpenAI)
 │ ├── file-handler.js # Utilities for file uploads, parsing, format conversion
-│ ├── storage-handler.js # Manages local and cloud storage operations
+│ ├── storage-handler.js # Manages MongoDB storage operations
 │ ├── logger.js # Centralized logging for debugging and monitoring
 │ └── client-config.js # Default configuration and feature toggles
 │
