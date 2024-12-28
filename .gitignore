@@ -1,6 +1,11 @@
 # Environment Variables
 .env
 
+# Firebase
+/firebase-config.js
+/core/firebase-config.js
+/firebase-service-account.json
+
 # Node.js
 node_modules/
 npm-debug.log*

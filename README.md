@@ -37,13 +37,14 @@ grok-api-interaction/
 ├── package.json # Node.js project dependencies & scripts
 │
 ├── core/ # Modular core for shared, reusable logic
-│ ├── models/ # schemas and models
-│ │ ├── ChatHistory.js
-│ │ └── LawFirm.js
+│ ├── models/ # Schemas and models
+│ │ ├── ChatHistory.js # Firestore structure for chat logs
+│ │ └── LawFirm.js # Firestore structure for client info
 │ ├── firebase-config.js # Firebase initialization and configuration
+│ ├── firestore-service.js # Encapsulated Firestore database operations
 │ ├── ai-service.js # Wrapper for AI interactions (e.g., OpenAI)
 │ ├── file-handler.js # Utilities for file uploads, parsing, format conversion
-│ ├── storage-handler.js # Manages storage operations
+│ ├── storage-handler.js # Manages local storage operations
 │ ├── logger.js # Centralized logging for debugging and monitoring
 │ └── client-config.js # Default configuration and feature toggles
 │
@@ -63,7 +64,8 @@ grok-api-interaction/
 ├── tools/ # Utility scripts and deployment tools
 │ ├── build.js # Script for packaging client-specific extensions
 │ ├── deploy.js # Script for deploying Chrome extensions
-│ └── migrate.js # Script for updating/migrating client configurations
+│ ├── migrate.js # Script for updating/migrating client configurations
+│ └── seed-database.js # Script to initialize Firestore with default data
 │
 ├── index.html # Main HTML for the Chrome extension popup UI
 └── grok-interaction.js # Primary backend script managing AI interactions
