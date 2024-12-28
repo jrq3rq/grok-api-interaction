@@ -30,21 +30,20 @@ The architecture is designed for **reusability**, **scalability**, and **easy cu
 ```markdown
 grok-api-interaction/
 │
-├── .env # Environment variables, including API keys and MongoDB URI
+├── .env # Environment variables, including API keys
 ├── .gitignore # Ensures sensitive files like .env are not committed
 ├── grok-interaction.js # Main script for backend logic & AI interaction
 ├── manifest.json # Chrome extension manifest (v3)
 ├── package.json # Node.js project dependencies & scripts
 │
 ├── core/ # Modular core for shared, reusable logic
-│ ├── mongo-config.js # MongoDB initialization and configuration
-│ ├── models/ # Mongoose schemas and models
+│ ├── models/ # schemas and models
 │ │ ├── ChatHistory.js
 │ │ └── LawFirm.js
 │ ├── firebase-config.js # Firebase initialization and configuration
 │ ├── ai-service.js # Wrapper for AI interactions (e.g., OpenAI)
 │ ├── file-handler.js # Utilities for file uploads, parsing, format conversion
-│ ├── storage-handler.js # Manages MongoDB storage operations
+│ ├── storage-handler.js # Manages storage operations
 │ ├── logger.js # Centralized logging for debugging and monitoring
 │ └── client-config.js # Default configuration and feature toggles
 │
