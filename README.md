@@ -40,6 +40,7 @@ grok-api-interaction/
 │ ├── models/ # Schemas and models
 │ │ ├── ChatHistory.js # Firestore structure for chat logs
 │ │ └── LawFirm.js # Firestore structure for client info
+│ ├── clientMetadata.js # Centralized metadata file for client-specific information, such as business details, key contacts, compliance policies, branding, and response templates
 │ ├── firebase-config.js # Firebase initialization and configuration
 │ ├── firestore-service.js # Encapsulated Firestore database operations
 │ ├── ai-service.js # Wrapper for AI interactions (e.g., OpenAI)
@@ -69,4 +70,90 @@ grok-api-interaction/
 │
 ├── index.html # Main HTML for the Chrome extension popup UI
 └── grok-interaction.js # Primary backend script managing AI interactions
+```
+
+```scss
+┌────────────────────────────────────────────────────┐
+│           Start (DOM Loaded)                       │
+└────────────────────────────────────────────────────┘
+                    │
+                    ▼
+┌────────────────────────────────────────────────────┐
+│ 1. Setup Utility Functions                         │
+│ - generateUniqueId()                               │
+│ - removeAILabel(response)                          │
+│ - constructPrompt(action, userInput)               │
+│ - cleanResponse(response)                          │
+│ - formatAndTruncateResponse(message)               │
+│ - displayResponse(message)                         │
+│ - displayMetadata(metadata)                        │
+│ - userRequestsMetadata(input)                      │
+│ - processInput(action, userInput)                  │
+│ - etc.                                             │
+└────────────────────────────────────────────────────┘
+                    │
+                    ▼
+┌────────────────────────────────────────────────────┐
+│ 2. Element References and Event Listeners          │
+│ - saveAllChatsButton, overlay triggers             │
+│ - fileInput, sendButton, clearHistoryButton, etc.  │
+└────────────────────────────────────────────────────┘
+                    │
+                    ▼
+┌────────────────────────────────────────────────────┐
+│ 3. loadChatHistory() Called at Startup             │
+│ - Reads saved history from localStorage            │
+│ - For each saved chat:                             │
+│ - Build UI of chat message                         │
+│ - Prepend to chatHistoryDiv                        │
+│ - updateSaveChatsButtonVisibility()                │
+│ - scrollTop = 0                                    │
+└────────────────────────────────────────────────────┘
+                    │
+                    ▼
+┌────────────────────────────────────────────────────┐
+│ 4. When User Clicks "Send":                        │
+│ - If file is selected, may do OCR or read text     │
+│ - Else uses text input directly                    │
+│ - processInput(action, userInput) is called        │
+└────────────────────────────────────────────────────┘
+                    │
+                    ▼
+┌────────────────────────────────────────────────────┐
+│ 5. processInput(action, userInput):                │
+│ - If userRequestsMetadata(userInput):              │
+│ → displayMetadata()                                │
+│ → saveChatHistory() (skips if needed)              │
+│                   Else:                            │
+│ (1) Build prompt with constructPrompt()            │
+│ (2) POST to /chat endpoint on server               │
+│ (3) Clean up AI response (remove prompt, etc)      │
+│ (4) displayResponse(finalAIResponse)               │
+│ (5) saveChatHistory(userMessage, AI, action)       │
+│ (6) loadChatHistory()                              │
+└────────────────────────────────────────────────────┘
+                    │
+                    ▼
+┌────────────────────────────────────────────────────┐
+│ 6. saveChatHistory():                              │
+│ - Possibly skip if metadata                        │
+│ - Clean + remove AI label                          │
+│ - Generate ID, time, hash                          │
+│ - Push new chat to localStorage                    │
+│ - updateChatHistoryVisibility()                    │
+└────────────────────────────────────────────────────┘
+                    │
+                    ▼
+┌────────────────────────────────────────────────────┐
+│ 7. loadChatHistory() Re-Called                     │
+│ - Rebuild chat UI from localStorage                │
+│ - Show "Download Chat" & "Delete Chat" buttons     │
+│ - Keep a max of 10 stored messages                 │
+└────────────────────────────────────────────────────┘
+                    │
+                    ▼
+┌────────────────────────────────────────────────────┐
+│ 8. UI: Clear Chat, Save All Chats, Overlays, etc.  │
+│ - Buttons perform final tasks                      │
+└────────────────────────────────────────────────────┘
 ```

@@ -1,41 +1,27 @@
+import clientMetadata from "../core/clientMetadata.js";
+
 document.addEventListener("DOMContentLoaded", () => {
   /********************************************************
    * ============  Utility Functions  ======================
    ********************************************************/
-
-  // Generate a unique ID
+  // Generates a UUID-like ID
   function generateUniqueId() {
-    return "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(
-      /[xy]/g,
-      function (c) {
-        const r = (Math.random() * 16) | 0,
-          v = c === "x" ? r : (r & 0x3) | 0x8;
-        return v.toString(16);
-      }
-    );
+    return "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, (c) => {
+      const r = (Math.random() * 16) | 0,
+        v = c === "x" ? r : (r & 0x3) | 0x8;
+      return v.toString(16);
+    });
   }
 
-  // Remove the first sentence from a text
-  function removeFirstSentence(text) {
-    const sentenceEndRegex = /([.?!])\s+(?=[A-Z])/;
-    const match = sentenceEndRegex.exec(text);
-    if (match) {
-      const index = match.index + match[0].length;
-      return text.substring(index).trim();
-    }
-    return text;
-  }
-
-  // Remove AI label if present
+  // Removes AI label prefix
   function removeAILabel(response) {
     const prefix = "Legal Enhancer AI:";
-    if (response.startsWith(prefix)) {
-      return response.substring(prefix.length).trim();
-    }
-    return response;
+    return response.startsWith(prefix)
+      ? response.substring(prefix.length).trim()
+      : response;
   }
 
-  // Construct dynamic prompts based on action
+  // Builds a prompt for each action
   function constructPrompt(action, userInput) {
     switch (action) {
       case "chat":
@@ -43,166 +29,309 @@ document.addEventListener("DOMContentLoaded", () => {
       case "summarize":
         return `Summarize the following content in the least amount of words but don't leave out any important information: \n\n${userInput}`;
       case "generate-bullet-points":
-        return `Convert the following content into bullet points:\n\n${userInput}`;
+        return `Convert to bullet points:\n\n${userInput}`;
       case "draft-summary":
-        return `Draft a detailed summary for the following content:\n\n${userInput}`;
+        return `Draft a summary:\n\n${userInput}`;
       default:
         throw new Error("Invalid action selected.");
     }
   }
 
-  // Clean response by removing markdown or specific labels
+  // Cleans markdown from response for on-screen display
   function cleanResponse(response) {
     return response.replace(/\*\*(.*?)\*\*/g, "$1").trim();
   }
 
-  // Format and truncate responses for display
-  function formatAndTruncateResponse(message, truncateParagraphs = 1) {
-    const cleanedMessage = cleanResponse(message);
-    const sections = cleanedMessage
-      .split("\n")
-      .filter((line) => line.trim() !== "");
+  // **NEW**: Removes unwanted Markdown but **preserves** bullet points or special formatting for downloads
+  function sanitizeForDownload(text) {
+    // Strip bold (`**...**`), italics, etc., but keep lines starting with dashes, asterisks, etc.
+    let stripped = text.replace(/\*\*(.*?)\*\*/g, "$1");
+    // You can add more rules here if you want to remove other Markdown elements
+    return stripped.trim();
+  }
 
+  // Truncates displayed text on the UI
+  function formatAndTruncateResponse(message, truncateParagraphs = 1) {
+    const cleaned = cleanResponse(message)
+      .split("\n")
+      .filter((l) => l.trim());
     const wrapper = document.createElement("div");
     wrapper.className = "formatted-response";
 
-    const truncatedContent = sections.slice(0, truncateParagraphs);
-    truncatedContent.forEach((section) => {
-      const paragraph = document.createElement("p");
-      paragraph.textContent = section;
-      wrapper.appendChild(paragraph);
+    // Show top paragraphs
+    const truncated = cleaned.slice(0, truncateParagraphs);
+    truncated.forEach((section) => {
+      const p = document.createElement("p");
+      p.textContent = section;
+      wrapper.appendChild(p);
     });
 
-    const isTruncated = sections.length > truncateParagraphs;
-    if (isTruncated) {
-      const fullResponseDiv = document.createElement("div");
-      fullResponseDiv.className = "full-response";
-      fullResponseDiv.style.display = "none";
-
-      sections.forEach((section) => {
-        const paragraph = document.createElement("p");
-        paragraph.textContent = section.trim();
-        fullResponseDiv.appendChild(paragraph);
+    // Toggle "Show More"
+    if (cleaned.length > truncateParagraphs) {
+      const fullDiv = document.createElement("div");
+      fullDiv.className = "full-response";
+      fullDiv.style.display = "none";
+      cleaned.forEach((section) => {
+        const p = document.createElement("p");
+        p.textContent = section.trim();
+        fullDiv.appendChild(p);
       });
 
-      const showMoreLink = document.createElement("span");
-      showMoreLink.textContent = " Show More...";
-      showMoreLink.className = "show-more-link";
-      showMoreLink.style.color = "blue";
-      showMoreLink.style.cursor = "pointer";
-
-      showMoreLink.addEventListener("click", () => {
-        if (fullResponseDiv.style.display === "none") {
-          fullResponseDiv.style.display = "block";
-          showMoreLink.textContent = " Show Less...";
+      const toggle = document.createElement("span");
+      toggle.textContent = " Show More...";
+      toggle.className = "show-more-link";
+      toggle.style.color = "blue";
+      toggle.style.cursor = "pointer";
+      toggle.addEventListener("click", () => {
+        if (fullDiv.style.display === "none") {
+          fullDiv.style.display = "block";
+          toggle.textContent = " Show Less...";
         } else {
-          fullResponseDiv.style.display = "none";
-          showMoreLink.textContent = " Show More...";
+          fullDiv.style.display = "none";
+          toggle.textContent = " Show More...";
         }
       });
 
-      wrapper.appendChild(fullResponseDiv);
-      wrapper.appendChild(showMoreLink);
+      wrapper.appendChild(fullDiv);
+      wrapper.appendChild(toggle);
     }
-
     return wrapper;
   }
 
-  // Display AI response in the UI
-  function displayResponse(message) {
-    const responseDiv = document.querySelector(".formatted-response");
-    responseDiv.innerHTML = "";
-    const formattedContent = formatAndTruncateResponse(message);
-    responseDiv.appendChild(formattedContent);
+  // Shows AI text in the UI
+  function displayResponse(msg) {
+    const div = document.querySelector(".formatted-response");
+    div.innerHTML = "";
+    div.appendChild(formatAndTruncateResponse(sanitizeText(msg)));
   }
 
-  // Format timestamps for display
-  function formatTimestamp(timestamp) {
-    try {
-      const date = new Date(timestamp);
-      if (isNaN(date.getTime())) {
-        throw new Error("Invalid timestamp");
+  // Shows metadata in the UI
+  function displayMetadata(data) {
+    const div = document.querySelector(".formatted-response");
+    div.innerHTML = "";
+    const metaP = document.createElement("p");
+    metaP.textContent = sanitizeText(data);
+    div.appendChild(metaP);
+  }
+
+  // Mapping of metadata types to trigger phrases
+  const metadataPhrases = {
+    firmInfo: [
+      "firm info",
+      "company information",
+      "company info",
+      "information about the firm",
+      "details about the company",
+      "company details",
+    ],
+    personInCharge: [
+      "who is in charge",
+      "who's in charge",
+      "person in charge",
+      "lead of the firm",
+      "head of the company",
+      "person responsible",
+    ],
+    aboutFirm: [
+      "tell me about your firm",
+      "tell me about your company",
+      "information about your firm",
+      "information about your company",
+      "details about your firm",
+      "details about your company",
+    ],
+    generalMetadata: [
+      "metadata",
+      "meta information",
+      "data about the firm",
+      "information data",
+      "general info",
+      "general information",
+    ],
+  };
+
+  function getMetadataType(input) {
+    const lowerInput = input.toLowerCase();
+
+    for (const [type, phrases] of Object.entries(metadataPhrases)) {
+      for (const phrase of phrases) {
+        if (lowerInput.includes(phrase)) {
+          return type;
+        }
       }
-      const options = {
+    }
+    return null;
+  }
+
+  function sanitizeText(text) {
+    const tempDiv = document.createElement("div");
+    tempDiv.innerHTML = text;
+    let sanitized = tempDiv.textContent || tempDiv.innerText || "";
+    sanitized = sanitized.replace(/\\/g, "\\\\").replace(/"/g, '\\"');
+    sanitized = sanitized.replace(/\s+/g, " ").trim();
+    return sanitized;
+  }
+
+  async function processInput(action, userInput) {
+    const metadataType = getMetadataType(userInput);
+
+    // Handle metadata requests
+    if (metadataType) {
+      let metadataResponse = "";
+
+      switch (metadataType) {
+        case "firmInfo":
+          metadataResponse = `Firm Name: ${clientMetadata.firmName}\nTagline: ${clientMetadata.tagline}`;
+          break;
+        case "personInCharge":
+          metadataResponse = `Person in Charge: ${clientMetadata.personInCharge.name} (${clientMetadata.personInCharge.title})\nContact: ${clientMetadata.personInCharge.contact}`;
+          break;
+        case "aboutFirm":
+          metadataResponse = `
+Firm Name: ${clientMetadata.firmName}
+Tagline: ${clientMetadata.tagline}
+Person in Charge: ${clientMetadata.personInCharge.name} (${
+            clientMetadata.personInCharge.title
+          })
+Contact: ${clientMetadata.personInCharge.contact}
+Specialties: ${clientMetadata.specialties.join(", ")}
+Locations:
+${clientMetadata.locations
+  .map(
+    (location) =>
+      `  - ${location.office}: ${location.address}, Phone: ${location.phone}, Email: ${location.email}`
+  )
+  .join("\n")}`;
+          break;
+        case "generalMetadata":
+          metadataResponse = `
+Firm: ${clientMetadata.firmName}
+Person in Charge: ${clientMetadata.personInCharge.name} (${clientMetadata.personInCharge.title})
+Contact: ${clientMetadata.personInCharge.contact}
+Code of Conduct: ${clientMetadata.codeOfConduct.summary}
+Confidentiality Notice: ${clientMetadata.confidentialityNotice}
+Legal Disclaimer: ${clientMetadata.legalDisclaimer}`;
+          break;
+        default:
+          metadataResponse = "Metadata information is currently unavailable.";
+      }
+
+      displayMetadata(metadataResponse);
+      const newChat = saveChatHistory(userInput, metadataResponse, action);
+      return newChat;
+    }
+
+    // Otherwise, normal AI request
+    const prompt = constructPrompt(action, userInput);
+
+    try {
+      const response = await fetch("http://localhost:3000/chat", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ prompt }),
+      });
+
+      if (!response.ok) {
+        throw new Error(`Server responded with status ${response.status}`);
+      }
+
+      const data = await response.json();
+      let aiResponse = data.response || "No response received.";
+
+      if (aiResponse.startsWith(prompt)) {
+        aiResponse = aiResponse.substring(prompt.length).trim();
+      }
+
+      const finalAIResponse = aiResponse;
+      displayResponse(finalAIResponse);
+      const newChat = saveChatHistory(userInput, finalAIResponse, action);
+      return newChat;
+    } catch (error) {
+      console.error("Error processing input:", error);
+      alert("An error occurred while processing your request.");
+      return null;
+    }
+  }
+
+  function userRequestsMetadata(input) {
+    return getMetadataType(input) !== null;
+  }
+
+  function formatTimestamp(ts) {
+    try {
+      const d = new Date(ts);
+      if (isNaN(d.getTime())) throw new Error("Invalid date");
+      return d.toLocaleString(undefined, {
         hour: "2-digit",
         minute: "2-digit",
         second: "2-digit",
         year: "numeric",
         month: "short",
         day: "numeric",
-      };
-      return date.toLocaleString(undefined, options);
-    } catch (error) {
-      console.error("Error formatting timestamp:", error);
+      });
+    } catch {
       return "Invalid Date";
     }
   }
 
-  // Get background color based on action type
-  function getBackgroundColor(action) {
-    switch (action) {
+  function getBackgroundColor(a) {
+    switch (a) {
       case "chat":
-        return "#f7ffeb"; // Light green
+        return "#f7ffeb";
       case "summarize":
-        return "#e7f4ff"; // Light blue
+        return "#e7f4ff";
       case "generate-bullet-points":
-        return "#f3e7ff"; // Light purple
+        return "#f3e7ff";
       case "draft-summary":
-        return "#fffbe7"; // Light yellow
+        return "#fffbe7";
       default:
-        return "#f7ffeb"; // Default light green
+        return "#f7ffeb";
     }
   }
 
-  // Download text file utility
-  function downloadTextFile(fileName, content) {
+  function downloadTextFile(fname, content) {
     const blob = new Blob([content], { type: "text/plain" });
     const a = document.createElement("a");
     a.href = URL.createObjectURL(blob);
-    a.download = fileName;
+    a.download = fname;
     a.click();
     URL.revokeObjectURL(a.href);
   }
 
-  // Utility function to read a file as text
   function readFileAsText(file) {
-    return new Promise((resolve, reject) => {
+    return new Promise((res, rej) => {
       const reader = new FileReader();
-      reader.onload = (event) => resolve(event.target.result);
-      reader.onerror = (error) => reject(error);
+      reader.onload = (e) => res(e.target.result);
+      reader.onerror = (e) => rej(e);
       reader.readAsText(file);
     });
   }
 
-  // OCR Utility with Tesseract.js
   async function performOCR(file) {
     try {
-      const responseDiv = document.querySelector(".formatted-response");
-      responseDiv.innerHTML = "<p>Performing OCR on the image...</p>";
-
+      const div = document.querySelector(".formatted-response");
+      div.innerHTML = "<p>Performing OCR...</p>";
       const {
         data: { text },
       } = await Tesseract.recognize(file, "eng", {
         logger: (m) => {
-          console.log("Tesseract Log:", m);
           if (m.status === "recognizing text") {
-            responseDiv.innerHTML = `<p>Performing OCR: ${Math.round(
+            div.innerHTML = `<p>Performing OCR: ${Math.round(
               m.progress * 100
             )}%</p>`;
           }
         },
       });
       return text || "";
-    } catch (error) {
-      console.error("OCR Error:", error);
-      alert("Failed to extract text from the image.");
+    } catch {
+      alert("OCR failed.");
       document.querySelector(".formatted-response").innerHTML = "";
       return null;
     }
   }
 
   /********************************************************
-   * ============  Element References  ======================
+   * ============  Element References  =====================
    ********************************************************/
   const saveAllChatsButton = document.getElementById("save-all-chats");
   const overlay = document.getElementById("overlay");
@@ -221,7 +350,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const closeButton = document.getElementById("close-button");
 
   /********************************************************
-   * ==========  Overlay Show/Hide Handlers  ================
+   * ==========  Overlay Show/Hide Handlers  ==============
    ********************************************************/
   function showOverlay() {
     overlay.style.display = "flex";
@@ -229,7 +358,6 @@ document.addEventListener("DOMContentLoaded", () => {
   function hideOverlay() {
     overlay.style.display = "none";
   }
-
   closeOverlayButton?.addEventListener("click", hideOverlay);
   triggerOverlayButton?.addEventListener("click", showOverlay);
 
@@ -245,7 +373,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
   const chatHistoryDiv = document.createElement("div");
   chatHistoryDiv.className = "chat-history";
-
   chatHistoryContainer.appendChild(chatHistoryTitle);
   chatHistoryContainer.appendChild(chatHistoryDiv);
   document.body.appendChild(chatHistoryContainer);
@@ -254,8 +381,8 @@ document.addEventListener("DOMContentLoaded", () => {
    * ===============  Chat History Updates  ===============
    ********************************************************/
   function updateChatHistoryVisibility() {
-    const savedChats = JSON.parse(localStorage.getItem("chatHistory")) || [];
-    if (savedChats.length > 0) {
+    const saved = JSON.parse(localStorage.getItem("chatHistory")) || [];
+    if (saved.length) {
       chatHistoryContainer.style.display = "block";
       saveAllChatsButton?.classList.add("visible");
     } else {
@@ -265,8 +392,8 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   function updateSaveChatsButtonVisibility() {
-    const savedChats = JSON.parse(localStorage.getItem("chatHistory")) || [];
-    if (savedChats.length > 0) {
+    const saved = JSON.parse(localStorage.getItem("chatHistory")) || [];
+    if (saved.length) {
       saveAllChatsButton?.classList.add("visible");
     } else {
       saveAllChatsButton?.classList.remove("visible");
@@ -278,95 +405,119 @@ document.addEventListener("DOMContentLoaded", () => {
    * ===============  Save All Chats Function  ============
    ********************************************************/
   function saveAllChats() {
-    const savedChats = JSON.parse(localStorage.getItem("chatHistory")) || [];
-    if (savedChats.length === 0) {
+    const saved = JSON.parse(localStorage.getItem("chatHistory")) || [];
+    if (!saved.length) {
       alert("No chats to save!");
       return;
     }
 
-    let chatContent = "Chat History\n\n";
-    savedChats.forEach((chat, index) => {
-      console.log(`Chat ${index + 1} User:`, chat.user);
-      console.log(`Chat ${index + 1} AI:`, chat.ai);
-      chatContent += `Chat ${index + 1}:\n`;
+    let content = "======= All Chat Histories =======\n\n";
 
-      const cleanedUserInput = removeFirstSentence(chat.user);
-      chatContent += `User: ${cleanedUserInput}\n`;
+    saved.forEach((chat, i) => {
+      const action = chat.action || "chat";
+      const timestamp = formatTimestamp(chat.time);
 
-      const cleanedAIResponse = removeFirstSentence(chat.ai);
-      chatContent += `AI: ${cleanedAIResponse}\n`;
+      // Use our new sanitizer for both user and AI
+      const sanitizedUser = sanitizeForDownload(chat.user);
+      const sanitizedAI = sanitizeForDownload(chat.ai);
 
-      chatContent += `Timestamp: ${chat.time}\n\n`;
+      content += `------------------------------
+Chat ${i + 1}: (${action.toUpperCase()})
+Timestamp: ${timestamp}
+------------------------------
+
+User:
+${sanitizedUser}
+
+AI:
+${sanitizedAI}
+
+==============================
+
+`;
     });
 
-    downloadTextFile("chat-history.txt", chatContent);
+    downloadTextFile("All_Chat_History.txt", content);
   }
-
   saveAllChatsButton?.addEventListener("click", saveAllChats);
 
   /********************************************************
    * ==========  Close Button Handler  =====================
    ********************************************************/
-  closeButton?.addEventListener("click", () => {
-    window.close();
-  });
+  closeButton?.addEventListener("click", () => window.close());
 
   /********************************************************
    * ===============  Download Chat Function  ==============
    ********************************************************/
   function downloadChat(chat) {
     const action = chat.action || "chat";
-    const chatContent = `Chat (${action.toUpperCase()}):\n\nUser:\n${
-      chat.user
-    }\n\nAI:\n${chat.ai}\n\nTimestamp: ${chat.time}`;
-    downloadTextFile(`chat-${formatTimestamp(chat.time)}.txt`, chatContent);
+    const timestamp = formatTimestamp(chat.time);
+
+    // Convert user + AI to plain text with bullet points or summaries intact
+    const sanitizedUser = sanitizeForDownload(chat.user);
+    const sanitizedAI = sanitizeForDownload(chat.ai);
+
+    const content = `==============================
+Chat (${action.toUpperCase()})
+Timestamp: ${timestamp}
+==============================
+
+User:
+${sanitizedUser}
+
+AI:
+${sanitizedAI}
+
+==============================
+
+`;
+
+    const filename = `Chat_${action.toUpperCase()}_${timestamp.replace(
+      /[:\/\\?%*|"<>]/g,
+      "-"
+    )}.txt`;
+
+    downloadTextFile(filename, content);
   }
 
   /********************************************************
    * ============  Delete Specific Chat Function ============
    ********************************************************/
   function deleteChat(chatId) {
-    let chatHistory = JSON.parse(localStorage.getItem("chatHistory")) || [];
-
-    chatHistory = chatHistory.filter((chat) => chat.id !== chatId);
-
-    localStorage.setItem("chatHistory", JSON.stringify(chatHistory));
-
+    let history = JSON.parse(localStorage.getItem("chatHistory")) || [];
+    history = history.filter((c) => c.id !== chatId);
+    localStorage.setItem("chatHistory", JSON.stringify(history));
     loadChatHistory();
-    alert("Chat deleted successfully.");
+    alert("Chat deleted.");
   }
 
   /********************************************************
    * =============  Save Chat History Function  ============
    ********************************************************/
-
-  /**
-   * Encodes a Unicode string into base64.
-   * @param {string} str - The Unicode string to encode.
-   * @returns {string} - The base64-encoded string.
-   */
   function base64EncodeUnicode(str) {
     return btoa(
-      encodeURIComponent(str).replace(
-        /%([0-9A-F]{2})/g,
-        function toSolidBytes(match, p1) {
-          return String.fromCharCode("0x" + p1);
-        }
+      encodeURIComponent(str).replace(/%([0-9A-F]{2})/g, (m, p1) =>
+        String.fromCharCode("0x" + p1)
       )
     );
   }
 
   function saveChatHistory(userMessage, aiResponse, action) {
+    // Skip saving metadata requests
+    if (userRequestsMetadata(userMessage)) {
+      console.log("Metadata request detected. Not saving to chat history.");
+      return null;
+    }
     const chatHistory = JSON.parse(localStorage.getItem("chatHistory")) || [];
     const timestamp = new Date().toISOString();
 
+    // No more removing first sentence. Keep them intact.
     const cleanedUserMessage = userMessage.trim();
-    const cleanedAIResponse = removeFirstSentence(aiResponse).trim();
+    const cleanedAIResponse = aiResponse.trim();
 
     const finalUserMessage = removeAILabel(cleanedUserMessage);
     const finalAIResponse = removeAILabel(cleanedAIResponse);
 
-    // Use the Unicode-safe base64 encoder
     const chatHash = base64EncodeUnicode(
       `${finalUserMessage}_${finalAIResponse}_${action}`
     );
@@ -382,8 +533,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     chatHistory.unshift(newChat);
 
-    const maxChats = 10;
-    if (chatHistory.length > maxChats) {
+    if (chatHistory.length > 10) {
       chatHistory.pop();
     }
 
@@ -391,19 +541,21 @@ document.addEventListener("DOMContentLoaded", () => {
       localStorage.setItem("chatHistory", JSON.stringify(chatHistory));
       console.log("Chat history saved successfully:", chatHistory);
       updateChatHistoryVisibility();
+      return newChat;
     } catch (error) {
       console.error("Error saving chat history:", error);
       alert("An error occurred while saving the chat history.");
+      return null;
     }
   }
 
   /********************************************************
    * ============  File Upload Event Listeners  ===========
    ********************************************************/
-  function showUploadIndicator(filename) {
-    uploadedFilename.textContent = `Uploaded: ${filename}`;
+  function showUploadIndicator(fname) {
+    uploadedFilename.textContent = `Uploaded: ${fname}`;
     uploadIndicator.classList.remove("hidden");
-    localStorage.setItem("uploadedFileName", filename);
+    localStorage.setItem("uploadedFileName", fname);
   }
 
   function clearUploadedFile() {
@@ -421,21 +573,18 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }
 
-  ["dragenter", "dragover", "dragleave", "drop"].forEach((eventName) => {
-    dropArea.addEventListener(eventName, (e) => {
+  ["dragenter", "dragover", "dragleave", "drop"].forEach((evt) => {
+    dropArea.addEventListener(evt, (e) => {
       e.preventDefault();
       e.stopPropagation();
     });
   });
-
-  dropArea.addEventListener("dragover", () => {
-    dropArea.classList.add("drag-over");
-  });
-
-  dropArea.addEventListener("dragleave", () => {
-    dropArea.classList.remove("drag-over");
-  });
-
+  dropArea.addEventListener("dragover", () =>
+    dropArea.classList.add("drag-over")
+  );
+  dropArea.addEventListener("dragleave", () =>
+    dropArea.classList.remove("drag-over")
+  );
   dropArea.addEventListener("drop", (e) => {
     dropArea.classList.remove("drag-over");
     const files = e.dataTransfer.files;
@@ -445,240 +594,92 @@ document.addEventListener("DOMContentLoaded", () => {
       handleFileUpload(files[0]);
     }
   });
-
-  dropArea.addEventListener("click", () => {
-    fileInput.click();
-  });
-
+  dropArea.addEventListener("click", () => fileInput.click());
   fileInput.addEventListener("change", () => {
-    const file = fileInput.files[0];
-    if (file) {
-      showUploadIndicator(file.name);
-      handleFileUpload(file);
+    const f = fileInput.files[0];
+    if (f) {
+      showUploadIndicator(f.name);
+      handleFileUpload(f);
     }
   });
-
   clearFileButton.addEventListener("click", clearUploadedFile);
 
   /********************************************************
    * ============  Send Button / Process Input  ===========
    ********************************************************/
-  async function processInput(action, userInput) {
-    const prompt = constructPrompt(action, userInput);
-    console.log("Constructed Prompt:", prompt);
-    try {
-      const response = await fetch("http://localhost:3000/chat", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ prompt }),
-      });
-
-      if (!response.ok) {
-        throw new Error(`Server responded with status ${response.status}`);
-      }
-
-      const data = await response.json();
-      let aiResponse = data.response || "No response received.";
-      console.log("Raw AI Response:", aiResponse);
-
-      // If the returned text starts with the prompt, remove it
-      if (aiResponse.startsWith(prompt)) {
-        aiResponse = aiResponse.substring(prompt.length).trim();
-        console.log("Cleaned AI Response:", aiResponse);
-      }
-
-      // Remove the AI's first sentence if you want that behavior
-      const finalAIResponse = removeFirstSentence(aiResponse);
-      console.log(
-        "Final AI Response after removing first sentence:",
-        finalAIResponse
-      );
-
-      displayResponse(finalAIResponse);
-      saveChatHistory(userInput, finalAIResponse, action);
-      loadChatHistory(); // Reload to update the UI
-    } catch (error) {
-      console.error("Error processing input:", error);
-      alert("An error occurred while processing your request.");
-    }
-  }
-
   sendButton.addEventListener("click", async () => {
     const action = actionDropdown.value;
-    const textInput = userPrompt.value.trim();
+    const txt = userPrompt.value.trim();
     const file = fileInput.files[0];
 
-    // Basic validation: if no input for non-chat + no file, abort
-    if (!textInput && action !== "chat" && !file) {
-      alert("Please provide input via text or upload a file.");
+    if (!txt && action !== "chat" && !file) {
+      alert("Provide input or a file.");
       return;
     }
 
-    // Show a loading message
     responseDiv.innerHTML = "<p>Loading...</p>";
 
-    let userInput = textInput || "No additional input provided.";
-
+    let userInput = txt || "No additional input provided.";
     if (file) {
-      // ====== CASE 1: We have a FILE ======
       if (/^image\//i.test(file.type)) {
         const extractedText = await performOCR(file);
-        if (!extractedText) {
-          alert("Failed to extract text from the image.");
-          return;
-        }
+        if (!extractedText) return;
         userInput = extractedText;
       } else {
         try {
           userInput = await readFileAsText(file);
-        } catch (error) {
-          console.error("Error reading file:", error);
+        } catch (e) {
+          console.error("File read error:", e);
           userInput = `File uploaded: ${file.name}`;
         }
       }
-
-      // Now we do the FormData fetch
       const formData = new FormData();
       formData.append("prompt", userInput);
       formData.append("action", action);
-      formData.append("file", file); // Optionally pass action so server knows how to handle
-
+      formData.append("file", file);
       try {
-        const response = await fetch("http://localhost:3000/chat", {
+        const resp = await fetch("http://localhost:3000/chat", {
           method: "POST",
-          body: formData, // No headers needed
+          body: formData,
         });
+        if (!resp.ok) throw new Error(`Server error ${resp.status}`);
+        const d = await resp.json();
+        const finalAI = d.response || "No response received.";
+        displayResponse(finalAI);
 
-        if (!response.ok) {
-          throw new Error(`Server responded with status ${response.status}`);
-        }
-
-        const data = await response.json();
-        const finalAIResponse = removeFirstSentence(data.response);
-        displayResponse(finalAIResponse);
-        saveChatHistory(userInput, finalAIResponse, action);
-        loadChatHistory(); // Reload to update the UI
-      } catch (error) {
-        console.error("Error processing input:", error);
-        alert("An error occurred while processing your request (file).");
+        // Save and also update UI chat list
+        const newChat = saveChatHistory(userInput, finalAI, action);
+        if (newChat) appendChatMessage(newChat);
+      } catch (err) {
+        console.error("File input error:", err);
+        alert("Error processing file.");
       }
     } else {
-      // ====== CASE 2: No file => Use JSON approach via processInput ======
       try {
-        await processInput(action, userInput);
-      } catch (error) {
-        console.error("Error processing input:", error);
-        alert("An error occurred while processing your request (no file).");
+        const newChat = await processInput(action, userInput);
+        if (newChat) appendChatMessage(newChat);
+      } catch (err) {
+        console.error("No-file error:", err);
+        alert("Error processing input.");
       }
     }
   });
 
   /********************************************************
-   * ============  Load and Display Chat History  ===========
+   * ============  Load & Display Chat History  ===========
    ********************************************************/
-
   function loadChatHistory() {
-    let savedChats = JSON.parse(localStorage.getItem("chatHistory")) || []; // Reverse the array to have newest messages first
-    savedChats = savedChats.slice().reverse(); // Use slice() to clone the array if needed
-
-    console.log("Loading chat history:", savedChats);
+    let saved = JSON.parse(localStorage.getItem("chatHistory")) || [];
+    saved = saved.slice().reverse();
     chatHistoryDiv.innerHTML = "";
-
-    savedChats.forEach((chat) => {
-      const action = chat.action || "chat";
-      const chatMessage = document.createElement("div");
-      chatMessage.className = "chat-message";
-      const messageColor = getBackgroundColor(action);
-      chatMessage.style.backgroundColor = messageColor;
-      chatMessage.classList.add("chat-message", action || "chat");
-
-      const userDiv = document.createElement("div");
-      userDiv.className = "user";
-      userDiv.innerHTML = `<strong>User (${action.toUpperCase()}):</strong>`;
-
-      const formattedUserInput = formatAndTruncateResponse(chat.user);
-      userDiv.appendChild(formattedUserInput);
-
-      const aiDiv = document.createElement("div");
-      aiDiv.className = "ai";
-      aiDiv.innerHTML = `<strong>Legal Enhancer AI:</strong>`;
-
-      const formattedAIResponse = formatAndTruncateResponse(chat.ai);
-      aiDiv.appendChild(formattedAIResponse);
-
-      const timestampDiv = document.createElement("div");
-      timestampDiv.className = "timestamp";
-      timestampDiv.textContent = `Sent on: ${formatTimestamp(chat.time)}`;
-      timestampDiv.style.color = "#9d9d9d";
-
-      const downloadButton = document.createElement("button");
-      downloadButton.className = "download-chat";
-      downloadButton.textContent = "Download Chat";
-      downloadButton.style.marginTop = "10px";
-      downloadButton.style.backgroundColor = messageColor;
-      downloadButton.style.border = "1px solid #0000001a";
-      downloadButton.style.color = "#333";
-      downloadButton.style.padding = "10px";
-      downloadButton.style.borderRadius = "5px";
-      downloadButton.style.fontSize = "10px";
-      downloadButton.style.textTransform = "uppercase";
-      downloadButton.style.boxShadow = "2px 2px 5px rgba(0, 0, 0, 0.2)";
-      downloadButton.style.cursor = "pointer";
-      downloadButton.addEventListener("click", () => downloadChat(chat));
-
-      const deleteButton = document.createElement("button");
-      deleteButton.className = "delete-chat";
-      deleteButton.textContent = "Delete Chat";
-      deleteButton.style.marginTop = "10px";
-      deleteButton.style.backgroundColor = messageColor;
-      deleteButton.style.border = "1px solid #0000001a";
-      deleteButton.style.color = "#333";
-      deleteButton.style.padding = "10px";
-      deleteButton.style.borderRadius = "5px";
-      deleteButton.style.fontSize = "10px";
-      deleteButton.style.textTransform = "uppercase";
-      deleteButton.style.boxShadow = "2px 2px 5px rgba(0, 0, 0, 0.2)";
-      deleteButton.style.cursor = "pointer";
-      deleteButton.style.marginLeft = "10px";
-      deleteButton.setAttribute("data-chat-id", chat.id);
-      deleteButton.addEventListener("click", (event) => {
-        const chatId = event.target.getAttribute("data-chat-id");
-        const confirmDelete = confirm(
-          "Are you sure you want to delete this chat?"
-        );
-        if (confirmDelete) {
-          deleteChat(chatId);
-        }
-      });
-
-      const buttonsContainer = document.createElement("div");
-      buttonsContainer.style.display = "flex";
-      buttonsContainer.style.justifyContent = "flex-start";
-      buttonsContainer.style.alignItems = "center";
-      buttonsContainer.style.marginTop = "10px";
-      buttonsContainer.appendChild(downloadButton);
-      buttonsContainer.appendChild(deleteButton);
-
-      chatMessage.appendChild(userDiv);
-      chatMessage.appendChild(aiDiv);
-      chatMessage.appendChild(timestampDiv);
-      chatMessage.appendChild(buttonsContainer);
-
-      chatHistoryDiv.prepend(chatMessage); // Prepend to show latest chat at the top
+    saved.forEach((chat) => {
+      appendChatMessage(chat);
     });
-
-    // ====== Key Update: Automatically Scroll to Top ======
-    requestAnimationFrame(() => {
-      chatHistoryDiv.scrollTop = 0;
-      console.log("ScrollTop set to:", chatHistoryDiv.scrollTop); // Debug log
-    });
-
+    requestAnimationFrame(() => (chatHistoryDiv.scrollTop = 0));
     updateSaveChatsButtonVisibility();
   }
 
-  /********************************************************
-   * ============  Clear Chats / Overlay Buttons  ==========
-   ********************************************************/
+  // Clears all chat histories and resets UI
   function clearAll() {
     clearUploadedFile();
     responseDiv.textContent = "";
@@ -686,16 +687,97 @@ document.addEventListener("DOMContentLoaded", () => {
     chatHistoryDiv.innerHTML = "";
     updateChatHistoryVisibility();
   }
-
   clearHistoryButton?.addEventListener("click", () => {
-    const confirmClear = confirm(
-      "Are you sure you want to clear the chat history?"
-    );
-    if (confirmClear) {
-      clearAll();
-    }
+    if (confirm("Clear chat history?")) clearAll();
   });
 
-  // Load the chat history when DOM is ready
+  /**
+   * Appends a single chat message to the chat history UI.
+   * @param {Object|null} chat - The chat object to append. If null, do nothing.
+   */
+  function appendChatMessage(chat) {
+    if (!chat) return;
+
+    const action = chat.action || "chat";
+    const cMsg = document.createElement("div");
+    cMsg.className = "chat-message";
+    cMsg.style.backgroundColor = getBackgroundColor(action);
+    cMsg.classList.add(action);
+
+    // User div
+    const userDiv = document.createElement("div");
+    userDiv.className = "user";
+    userDiv.innerHTML = `<strong>User (${action.toUpperCase()}):</strong>`;
+    userDiv.appendChild(formatAndTruncateResponse(chat.user));
+
+    // AI div
+    const aiDiv = document.createElement("div");
+    aiDiv.className = "ai";
+    aiDiv.innerHTML = `<strong>Legal Enhancer AI:</strong>`;
+    aiDiv.appendChild(formatAndTruncateResponse(chat.ai));
+
+    // Timestamp
+    const timeDiv = document.createElement("div");
+    timeDiv.className = "timestamp";
+    timeDiv.textContent = `Sent on: ${formatTimestamp(chat.time)}`;
+    timeDiv.style.color = "#9d9d9d";
+
+    // Download Button
+    const dlBtn = document.createElement("button");
+    dlBtn.className = "download-chat";
+    dlBtn.textContent = "Download Chat";
+    dlBtn.style.marginTop = "10px";
+    dlBtn.style.backgroundColor = getBackgroundColor(action);
+    dlBtn.style.border = "1px solid #0000001a";
+    dlBtn.style.color = "#333";
+    dlBtn.style.padding = "10px";
+    dlBtn.style.borderRadius = "5px";
+    dlBtn.style.fontSize = "10px";
+    dlBtn.style.textTransform = "uppercase";
+    dlBtn.style.boxShadow = "2px 2px 5px rgba(0, 0, 0, 0.2)";
+    dlBtn.style.cursor = "pointer";
+    dlBtn.addEventListener("click", () => downloadChat(chat));
+
+    // Delete Button
+    const delBtn = document.createElement("button");
+    delBtn.className = "delete-chat";
+    delBtn.textContent = "Delete Chat";
+    delBtn.style.marginTop = "10px";
+    delBtn.style.backgroundColor = getBackgroundColor(action);
+    delBtn.style.border = "1px solid #0000001a";
+    delBtn.style.color = "#333";
+    delBtn.style.padding = "10px";
+    delBtn.style.borderRadius = "5px";
+    delBtn.style.fontSize = "10px";
+    delBtn.style.textTransform = "uppercase";
+    delBtn.style.boxShadow = "2px 2px 5px rgba(0, 0, 0, 0.2)";
+    delBtn.style.cursor = "pointer";
+    delBtn.style.marginLeft = "10px";
+    delBtn.setAttribute("data-chat-id", chat.id);
+    delBtn.addEventListener("click", (ev) => {
+      const cid = ev.target.getAttribute("data-chat-id");
+      if (confirm("Delete this chat?")) deleteChat(cid);
+    });
+
+    // Buttons Container
+    const btnWrap = document.createElement("div");
+    btnWrap.style.display = "flex";
+    btnWrap.style.justifyContent = "flex-start";
+    btnWrap.style.alignItems = "center";
+    btnWrap.style.marginTop = "10px";
+    btnWrap.appendChild(dlBtn);
+    btnWrap.appendChild(delBtn);
+
+    // Assemble Chat Message
+    cMsg.appendChild(userDiv);
+    cMsg.appendChild(aiDiv);
+    cMsg.appendChild(timeDiv);
+    cMsg.appendChild(btnWrap);
+
+    // Prepend to show latest chat at the top
+    chatHistoryDiv.prepend(cMsg);
+  }
+
+  // Load chat history on startup
   loadChatHistory();
 });
