@@ -676,6 +676,7 @@ ${sanitizedAI}
       appendChatMessage(chat);
     });
     requestAnimationFrame(() => (chatHistoryDiv.scrollTop = 0));
+    updateChatHistoryVisibility(); // Ensure visibility is updated based on saved chats
     updateSaveChatsButtonVisibility();
   }
 
